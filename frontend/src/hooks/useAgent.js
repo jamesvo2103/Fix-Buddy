@@ -3,7 +3,7 @@ import { useDiagnosis } from './useDiagnosis';
 import axiosInstance from '../config/api';
 
 export function useAgent() {
-  const { setLoading, setIsBlocked, addDiagnosis } = useDiagnosis();
+  const { setLoading, setIsBlocked, setClarifyQuestion, addDiagnosis } = useDiagnosis();
   const [error, setError] = useState(null);
 
   const callAgent = async (formData) => {
@@ -13,15 +13,22 @@ export function useAgent() {
     try {
       const response = await axiosInstance.post('/api/agent', formData);
       
-      if (response.data.blocked) {
-        setIsBlocked(true);
-      } else {
-        addDiagnosis(response.data);
+      if (response.data.status === 'clarify') {
+        setClarifyQuestion(response.data.question);
+        return { status: 'clarify', question: response.data.question };
       }
       
+      if (response.data.blocked) {
+        setIsBlocked(true);
+        addDiagnosis(response.data);
+        return response.data;
+      }
+      
+      addDiagnosis(response.data);
       return response.data;
     } catch (err) {
-      setError(err.response?.data?.message || 'Error processing request');
+      const errorMsg = err.response?.data?.message || 'Error processing request';
+      setError(errorMsg);
       throw err;
     } finally {
       setLoading(false);

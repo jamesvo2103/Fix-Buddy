@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback, useEffect } from 'react';
 
 export const DiagnosisContext = createContext();
 
@@ -7,17 +7,43 @@ export function DiagnosisProvider({ children }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [clarifyQuestion, setClarifyQuestion] = useState(null);
+
+  // Load history from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('diagnosisHistory');
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load history', e);
+      }
+    }
+  }, []);
 
   const addDiagnosis = useCallback((diagnosis) => {
-    setCurrentDiagnosis(diagnosis);
-    setHistory(prev => [diagnosis, ...prev.slice(0, 9)]); // Keep last 10
-    localStorage.setItem('diagnosisHistory', JSON.stringify([diagnosis, ...history.slice(0, 9)]));
+    const newDiagnosis = {
+      ...diagnosis,
+      id: Date.now(),
+      timestamp: new Date().toISOString()
+    };
+    setCurrentDiagnosis(newDiagnosis);
+    const updated = [newDiagnosis, ...history.slice(0, 9)];
+    setHistory(updated);
+    localStorage.setItem('diagnosisHistory', JSON.stringify(updated));
   }, [history]);
 
   const clearDiagnosis = useCallback(() => {
     setCurrentDiagnosis(null);
     setIsBlocked(false);
+    setClarifyQuestion(null);
   }, []);
+
+  const deleteFromHistory = useCallback((id) => {
+    const updated = history.filter(item => item.id !== id);
+    setHistory(updated);
+    localStorage.setItem('diagnosisHistory', JSON.stringify(updated));
+  }, [history]);
 
   return (
     <DiagnosisContext.Provider 
@@ -26,10 +52,13 @@ export function DiagnosisProvider({ children }) {
         history, 
         loading, 
         isBlocked, 
+        clarifyQuestion,
         addDiagnosis, 
         clearDiagnosis, 
+        deleteFromHistory,
         setLoading, 
-        setIsBlocked 
+        setIsBlocked,
+        setClarifyQuestion
       }}
     >
       {children}
