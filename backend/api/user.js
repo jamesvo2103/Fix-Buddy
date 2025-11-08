@@ -1,27 +1,39 @@
-const bcrypt = require('bcrypt');
-const usersRouter = require('express').Router();
-const User = require('../models/user');
+import bcrypt from 'bcrypt';
+import { Router } from 'express';
+import { User } from '../models/schema.js';
+
+const usersRouter = Router();
 
 usersRouter.get('/', async (request, response) => {
-      const users = await User.find({}).populate('uses', { username: 1, name: 1 });
+      const users = await User.find({}, { username: 1, experience: 1 });
       response.json(users);
-    })
+});
 
 usersRouter.post('/', async (request, response) => {
-      const { username, name, password } = request.body;
+      const { username, password, experience } = request.body;
+
+      // Validate experience level
+      if (!experience || !['beginner', 'intermediate', 'expert'].includes(experience)) {
+            return response.status(400).json({
+                  error: 'Experience must be one of: beginner, intermediate, expert'
+            });
+      }
 
       const saltRounds = 10;
-      const passwordHash = await bcrypt.hash(password, saltRounds);
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       const user = new User({
-        username,
-        name,
-        passwordHash,
+            username,
+            password: hashedPassword,
+            experience
       });
 
       const savedUser = await user.save();
+      response.status(201).json({
+            id: savedUser._id,
+            username: savedUser.username,
+            experience: savedUser.experience
+      });
+});
 
-      response.status(201).json(savedUser);
-    })
-
-module.exports = usersRouter;
+export default usersRouter;

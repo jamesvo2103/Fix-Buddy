@@ -4,15 +4,13 @@
 // - GET  /api/search/videos?q=...   → YouTube helper (optional)
 // - GET  /api/search/places?lat=&lng=&query=... → Places helper (optional)
 
-const express = require('express');
-const rateLimit = require('express-rate-limit');
+import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
+import { Diagnosis } from '../models/schema.js';
 
-const router = express.Router();
+const router = Router();
 
 /* ---------------------- Router-level middleware ---------------------- */
-
-// Allow larger JSON body because we may receive imageBase64 (MVP style)
-router.use(express.json({ limit: '8mb' }));
 
 // Simple rate limiter for the agent endpoint to avoid abuse
 const agentLimiter = rateLimit({ windowMs: 60 * 1000, max: 10 });
@@ -24,12 +22,18 @@ function validateAgentPayload(body) {
     return ['Request body is required.'];
   }
 
-  const { description, imageBase64, skillLevel, tools, location, clarifyAnswer } = body;
+  const { description, imageBase64, experience, tools, location, clarifyAnswer } = body;
 
   // Need at least one of description or imageBase64
   if (!description && !imageBase64) {
     errs.push('Provide either "description" or "imageBase64".');
   }
+
+  // Validate experience level if provided
+  if (experience && !['beginner', 'intermediate', 'expert'].includes(experience)) {
+    errs.push('experience must be one of: beginner, intermediate, expert');
+  }
+
   return errs;
 }
 
@@ -45,15 +49,48 @@ router.post('/agent', agentLimiter, async (req, res) => {
       return res.status(400).json({ status: 'error', code: 'BAD_REQUEST', message: errs.join(' ') });
     }
 
-    const { description, imageBase64, skillLevel, tools, location, clarifyAnswer } = req.body;
+    const { description, imageBase64, experience, tools, location, clarifyAnswer } = req.body;
 
     // 2) Try your full agent orchestrator (preferred)
     try {
       // eslint-disable-next-line global-require
-      const runAgent = require('../agent/runAgent');
+      const { default: runAgent } = await import('../agent/runAgent.js');
       if (typeof runAgent === 'function') {
-        const input = { description, imageBase64, skillLevel, tools, location, clarifyAnswer };
+        const input = { description, imageBase64, experience, tools, location, clarifyAnswer };
         const result = await runAgent(input);
+
+        // Save diagnosis history if user is authenticated
+        if (req.user?.userId && result?.itemName) {
+          const diagnosis = new Diagnosis({
+            userId: req.user.userId,
+            itemName: result.itemName,
+            itemModel: result.itemModel || result.brand_model,
+            repairabilityScore: result.repairability?.score,
+            issues: result.issues?.map(issue => ({ problem: issue.name })) || [],
+            diagnosis: {
+              safety: result.diy?.safety,
+              tools: result.diy?.tools || [],
+              steps: result.diy?.steps || [],
+              parts: result.diy?.parts?.map(part => ({
+                name: part.name,
+                estimatedCost: part.cost || part.estimatedCost
+              })) || []
+            },
+            nearbyShops: result.nearby?.map(shop => ({
+              name: shop.name,
+              address: shop.address,
+              rating: shop.rating,
+              placeId: shop.place_id || shop.placeId
+            })) || [],
+            tutorials: result.videos?.map(video => ({
+              title: video.title,
+              url: video.url,
+              source: 'youtube'
+            })) || []
+          });
+          await diagnosis.save();
+        }
+
         return res.json({ status: 'ok', result });
       }
     } catch (e) {
@@ -63,12 +100,10 @@ router.post('/agent', agentLimiter, async (req, res) => {
 
     // 3) Fallback: call tools directly if present (minimal orchestration)
     try {
-      // eslint-disable-next-line global-require
-      const gemini = require('../tools/gemini');
-      // eslint-disable-next-line global-require
-      const youtube = require('../tools/youtube');
-      // eslint-disable-next-line global-require
-      const places = require('../tools/places');
+      // Dynamic imports for tools
+      const { default: gemini } = await import('../tools/gemini.js');
+      const { default: youtube } = await import('../tools/youtube.js');
+      const { default: places } = await import('../tools/places.js');
 
       const analysis = gemini?.analyze
         ? await gemini.analyze({ description, imageBase64, skillLevel, tools, clarifyAnswer })
@@ -164,7 +199,7 @@ router.get('/search/places', async (req, res) => {
     }
 
     // Convert address → lat/lng
-    const { geocodeAddress } = require('../tools/geocode');
+    const { geocodeAddress } = await import('../tools/geocode.js');
     let coords;
     try {
       coords = await geocodeAddress(address);
@@ -195,4 +230,4 @@ router.get('/search/places', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
