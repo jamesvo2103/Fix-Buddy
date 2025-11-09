@@ -1,117 +1,32 @@
-# FixBuddy 🛠️
+**Inspiration**
+When people talk about environmental problems, most focus on the carbon footprint. But another major issue is the amount of waste that ends up in landfills. Every day, people throw away broken household items that could easily be repaired with a little guidance. We built FixBuddy to help change that, a tool that helps users diagnose what’s wrong with an item and learn how to fix it themselves, instead of tossing it away.
 
-FixBuddy is an AI-powered web application that helps users diagnose and solve household repair problems with step-by-step DIY plans. Instantly get item diagnosis, repairability scores, safety instructions, and curated tutorial links for a safer and smarter home maintenance experience.
+**What it does**
+FixBuddy is an AI-powered web app that helps users diagnose and fix broken household items on their own.
 
-[Live Repo](https://github.com/jamesvo2103/Fix-Buddy)
+Here’s how it works:
 
----
+User Input: The user uploads a photo of the broken item and provides a short text description of what’s wrong.
 
-## 🌟 Features
+AI Diagnosis: The first agent analyzes the image and description to identify the item and understand the likely issue. It then determines whether the item is safe for the user to handle.
 
-- **AI Diagnosis**: Upload an image or describe your issue — Gemini AI identifies the item, predicts the top issues, and estimates repairability.
-- **Dynamic DIY Plans**: Tailored repair steps for beginners, intermediates, and experts with safety notes, tools, part suggestions, and cost estimates.
-- **Clarification Questions**: AI automatically asks for clarifications if confidence is low.
-- **Video Tutorials**: Recommends the best YouTube/iFixit resources for your identified problem.
-- **History**: Track your last 10 repairs for easy access and reference.
-- **Safe by Design**: Built-in safety gate blocks high-risk DIY categories and always prioritizes your safety.
-- **Accessibility**: Read-aloud repair instructions for a hands-free, accessible experience.
-- **Modern UI**: Mobile-responsive React interface with dark mode, quick login, and simple navigation.
+Repair Guidance: If it’s safe, a second AI agent generates a set of clear, step-by-step instructions on how to fix it, tailored to the user’s experience level.
 
----
+Tutorials and Tools: FixBuddy also recommends relevant YouTube tutorials and lists the tools needed for the repair.
 
-## 🛠️ Tech Stack
+Over time, the system learns from user interactions. For example, someone who marks themselves as a beginner will get simpler steps and easier tutorials, while an advanced user might get more detailed or technical instructions. The goal is to make DIY repairs as intuitive and safe as possible for everyone.
+![FixBuddy Demo](./demo.gif)
+**How we built it**
+Frontend: React.js, Taildwind CSS
+Backend: Node.js, MongoDB
+AI Integration: Gemini API, Youtube Data API, Langchain, Multi AI Agents 
 
-- **Frontend**: React.js, Tailwind CSS
-- **Backend**: Node.js, Express.js, MongoDB, Mongoose
-- **AI/ML**: Gemini API (`@google/generative-ai`), LangChain
-- **APIs**: YouTube Data API (for tutorials)
-- **Auth**: JWT-based authentication
-- **Utilities**: dotenv, cors, helmet, bcrypt
+**Challange we ran into**
+Identifying an item and providing accurate repair guidance turned out to be a much more complicated task than we initially expected. When we first tried using a single AI model to handle both diagnosis and instruction, the results were inconsistent. The model often mixed the two steps together, sometimes it would start generating repair steps before fully understanding the problem, and other times it would misidentify what the user was trying to fix entirely.
 
----
+To solve this, we decided to split the process into two separate AI agents. The first agent focuses only on understanding what the item is, what might be wrong with it, and whether it’s safe to repair. The second agent then takes that information and focuses solely on producing the actual repair instructions. 
 
-## 🚩 Distinctiveness & Complexity
+**What's next **
+Our next step is to deploy FixBuddy on a cloud platform so that anyone can access it from their phone or computer. Once deployed, users will be able to take photos directly from their camera and send them straight to the AI agents for processing, making the experience faster and more convenient.
 
-FixBuddy stands out by combining:
-- **Multi-modal input** - accepts both images and text to maximize diagnostic coverage.
-- **Repairability Scoring** - provides a quantified, AI-driven "Can I fix it myself?" estimate.
-- **Dynamic tutorials** - fetches repair videos and guides tailored to your specific device and fault.
-- **Clarification logic** - intelligently queries for missing details only if necessary, reducing user frustration.
-- **No third-party mapping dependencies** - all local shop suggestions are handled without Google Maps, for privacy and portability.
-
----
-
-## 📁 File Structure
-
-- `frontend/` – React frontend (user dashboard, diagnosis flow, login/register, etc.)
-- `backend/` – Node.js/Express backend (API routes, AI agent, authentication, MongoDB models)
-- `.env` – Secrets, API keys, and database URLs (see setup below)
-- `README.md` – Project documentation (this file)
-
----
-
-## 🚀 Getting Started
-
-### 1. Clone the repository
-
-```
-git clone https://github.com/jamesvo2103/Fix-Buddy.git
-cd Fix-Buddy
-```
-
-### 2. Frontend Setup (`client`)
-
-```
-cd frontend
-npm install
-npm run dev
-```
-
-### 3. Backend Setup (`server`)
-
-```
-cd backend
-npm install
-npm run server
-```
-
-### 4. Environment Configuration
-
-- Copy `.env.example` to `.env` in both `client/` and `server/` directories and fill in required values:
-  - MongoDB URI
-  - Gemini API key
-  - JWT secret
-  - YouTube API key
-
----
-
-## 🖥️ Screenshots
-
-<img width="2550" height="1254" alt="fixbuddy" src="https://github.com/user-attachments/assets/8543567c-f3bf-48a1-be2e-5a33dbef0f08" />
-
----
-
-## 📱 Mobile-Responsiveness
-
-All pages are fully responsive and optimized for mobile and tablet viewing.
-
----
-
-## 👩‍💻 Authors
-
-**Andrea Tran | tran3ah@mail.uc.edu**  
-Computer Engineering - University of Cincinnati, Class of 2029  
-**James Vo | vongochieu2103@gmail.com**  
-Computer Engineering - Villanova University, Class of 2028
-
----
-
-## 📌 Additional Notes
-
-- No data leaves your device except necessary API calls for diagnosis and tutorial recommendations.
-- FixBuddy does not use browser location or Google Maps APIs.
-- For additional support or contributions, open an issue or pull request on GitHub.
-
----
-
-Start diagnosing and fixing smarter — with **FixBuddy**! 🛠️
+We also plan to improve the AI workflow to make results more consistent and accurate. While the current two-agent setup works well, performance can vary depending on image quality or how the issue is described. Refining how the agents share context and interpret inputs will help ensure that FixBuddy delivers reliable, step-by-step repair guidance every time.
