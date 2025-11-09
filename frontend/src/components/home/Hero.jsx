@@ -33,7 +33,7 @@ const Hero = () => {
             <span className="text-2xl font-bold">FixBuddy</span>
           </a>
 
-          <div className="hidden md:block space-x-3">
+          <div className="md:block space-x-3 flex gap-2">
             <Link to='/login?state=register'>
                 <button className="px-6 py-2 bg-purple-600 hover:bg-purple-700 transition text-white rounded-md">
                 Get started
