@@ -13,8 +13,12 @@ const app = express();
 connectDB();
 
 // --- Middleware ---
-app.use(cors());
-app.use(express.json({ limit: '5mb' })); // For image uploads
+const corsOptions = {
+      origin: process.env.FRONTEND_URL
+    };
+    app.use(cors(corsOptions));
+    
+    app.use(express.json({ limit: '5mb' }));
 
 // --- Routes ---
 // This one line imports all your routes
