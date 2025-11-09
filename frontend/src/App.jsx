@@ -14,7 +14,7 @@ const App = () => {
 
         <Route path='app' element={<Layout />}>
           <Route index element={<Dashboard />}/>
-          <Route path='/fixbuddy/:fixBuddyId' element={<FixBuddy />}/>
+          <Route path='fixbuddy/:fixBuddyId' element={<FixBuddy />}/>
         </Route>
 
         <Route path='login' element={<Login />}/>
