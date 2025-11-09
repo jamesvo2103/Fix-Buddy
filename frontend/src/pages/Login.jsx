@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 
 const Login = () => {
   const dispatch = useDispatch()
-  const navigate = useNavigate()  // ✅ Added
+  const navigate = useNavigate()
 
   const query = new URLSearchParams(window.location.search)
   const urlState = query.get('state')
@@ -24,11 +24,10 @@ const Login = () => {
       e.preventDefault()
       try {
         const { data } = await api.post(`/api/users/${state}`, formData)
-        dispatch(login(data))  // ✅ Dispatches both token and user
+        dispatch(login(data))
         localStorage.setItem('token', data.token)
         toast.success(data.message)
         
-        // ✅ REDIRECT TO DASHBOARD AFTER LOGIN
         navigate('/app')
         
       } catch (error) {
