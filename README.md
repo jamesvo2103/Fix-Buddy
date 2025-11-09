@@ -21,7 +21,7 @@ Over time, the system learns from user interactions. For example, someone who ma
 **How we built it**
 ------------------------------------------
 Frontend: React.js, Taildwind CSS
-Backend: Node.js, MongoDB
+Backend: Express.js, Node.js, MongoDB
 AI Integration: Gemini API, Youtube Data API, Langchain, Multi AI Agents 
 
 **Challange we ran into**
