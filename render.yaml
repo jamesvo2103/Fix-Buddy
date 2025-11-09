@@ -6,7 +6,7 @@ services:
   - type: pserv
     name: fix-buddy-db
     plan: free # Use 'standard' or higher for production
-    mongoDBVersion: "7.0"
+    # mongoDBVersion: "7.0"  <-- DELETED THIS INVALID LINE
 
   # 2. The Backend (Node.js Web Service)
   - type: web
@@ -27,7 +27,7 @@ services:
           property: connectionString
       - key: FRONTEND_URL
         fromService:
-          type: staticSite # <-- This type also changed from 'static'
+          type: static # <-- FIXED THIS (was 'staticSite')
           name: fix-buddy-app
           property: url
       - key: GEMINI_API_KEY
@@ -38,7 +38,7 @@ services:
         sync: false # Set this in the Render dashboard
 
 # 3. The Frontend (React Static Site)
-# This is now its own top-level category
+# This top-level block is correct.
 staticSites:
   - name: fix-buddy-app
     plan: free
