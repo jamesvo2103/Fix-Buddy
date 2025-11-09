@@ -34,7 +34,7 @@ router.post('/', agentLimiter, async (req, res) => { // Note: Changed to '/' sin
       // --- FIXED PATH: "agents" (plural) ---
       const { default: runAgent } = await import('../agents/orchestrator.js');
       if (typeof runAgent === 'function') {
-        const input = { userId: req.user?.userId, description, imageBase64, experience, tools, location, clarifyAnswer };
+        const input = { userId: req.user.id, description, imageBase64, experience, tools, location, clarifyAnswer };
         const result = await runAgent(input);
         
         // --- REMOVED DUPLICATE SAVE BLOCK ---

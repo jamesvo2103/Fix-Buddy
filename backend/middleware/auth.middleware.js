@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import { User } from '../models/User.js';
 
 export const userExtractor = async (req, res, next) => {
   const authorization = req.get('authorization');
@@ -15,14 +14,21 @@ export const userExtractor = async (req, res, next) => {
 
       // Attach the user's id to the request
       req.user = { id: decodedToken.id, username: decodedToken.username };
+
+      // --- ❗️ THIS IS THE FIX ---
+      // next() must be called *inside* the 'try' block
+      // to continue to the next route.
+      next(); 
       
     } catch (error) {
       console.error('Token verification failed:', error.message);
       return res.status(401).json({ error: 'Token expired or invalid' });
     }
   } else {
+    // If no token, just return an error. Do not call next().
     return res.status(401).json({ error: 'Token missing' });
   }
 
-  next();
+  // --- BUG ---
+  // The 'next()' call was here, which was wrong.
 };

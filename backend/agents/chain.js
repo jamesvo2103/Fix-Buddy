@@ -10,6 +10,12 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
+// --- Helper for string/null-to-undefined preprocessing ---
+const emptyToUndefined = z.preprocess(
+  (val) => (val === "" || val === null ? undefined : val),
+  z.any().optional()
+);
+
 // --- Schema 1 (For Diagnosis) ---
 const DiagnosisSchema = z.object({
   item_name: z.string().nullable().describe("The specific name of the item, e.g., 'Wooden dining chair'"),
@@ -24,8 +30,8 @@ const DiagnosisSchema = z.object({
     probability: z.number().min(0).max(1),
     description: z.string().optional(),
     
-    // --- ❗️ NEW, ROBUST FIX #1 ---
-    // Actively cleans the AI's input *before* validation.
+    // --- ❗️ THIS IS THE FIX ---
+    // Preprocess the value. If it's "" or null, treat it as undefined, which .optional() allows.
     severity: z.preprocess(
       (val) => {
         if (typeof val === "string") {
@@ -34,7 +40,7 @@ const DiagnosisSchema = z.object({
             return lower; // Return the valid, lowercase value
           }
         }
-        return undefined; // Discard all other invalid values (null, "", "N/A", "Medium", etc.)
+        return undefined; // Discard all other invalid values (null, "", "N/A", etc.)
       },
       z.enum(["low","medium","high"]).optional() // The enum now receives either a valid value or undefined
     ),
@@ -51,8 +57,7 @@ const GuidanceSchema = z.object({
       required: z.boolean().default(true),
     })).default([]),
 
-    // --- ❗️ NEW, ROBUST FIX #2 ---
-    // Apply the same robust cleaning logic to skill_required
+    // --- ❗️ THIS IS THE FIX for the *next* error you would see ---
     skill_required: z.preprocess(
       (val) => {
         if (typeof val === "string") {
@@ -66,11 +71,9 @@ const GuidanceSchema = z.object({
       z.enum(["beginner","intermediate","expert"]).optional()
     ),
 
-    // --- ❗️ NEW, ROBUST FIX #3 ---
-    // Allow 0 (nonnegative) instead of requiring >0 (positive)
     time_minutes: z.preprocess(
       (val) => (val === null ? undefined : val),
-       z.number().nonnegative().optional()
+       z.number().nonnegative().optional() // Allows 0 or null
     ),
     
     preparation: z.array(z.string()).default([]),
