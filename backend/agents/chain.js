@@ -24,7 +24,11 @@ const DiagnosisSchema = z.object({
     name: z.string().describe("Short name of the problem, e.g., 'Cracked leg joint'"),
     probability: z.number().min(0).max(1),
     description: z.string().optional(),
-    severity: z.enum(["low","medium","high"]).optional(),
+    // Preprocess the value. If it's "" or null, treat it as undefined, which .optional() allows.
+    severity: z.preprocess(
+      (val) => (val === "" || val === null ? undefined : val),
+      z.enum(["low","medium","high"]).optional()
+    ),
   })).min(1),
 });
 
@@ -36,8 +40,16 @@ const GuidanceSchema = z.object({
       name: z.string(),
       required: z.boolean().default(true),
     })).default([]),
-    skill_required: z.enum(["beginner","intermediate","expert"]).default("beginner"),
-    time_minutes: z.number().positive(),
+    // Apply the same preprocess logic to skill_required
+    skill_required: z.preprocess(
+      (val) => (val === "" || val === null ? undefined : val),
+      z.enum(["beginner","intermediate","expert"]).optional()
+    ),
+    // Allow 0 (nonnegative) instead of requiring >0 (positive)
+    time_minutes: z.preprocess(
+      (val) => (val === null ? undefined : val),
+       z.number().nonnegative().optional()
+    ),
     preparation: z.array(z.string()).default([]),
     steps: z.array(z.object({
       instruction: z.string(),
@@ -89,7 +101,7 @@ Return ONLY the JSON for this diagnosis. DO NOT provide repair steps.`;
 function makeGuidancePrompt({ userProfile, diagnosis, clarify }) {
   const guard = "OUTPUT RULES: Return ONLY a single JSON object (no prose, no markdown, no ```). The JSON MUST match the field names exactly.";
   const safety = `SAFETY: You are a CAUTIOUS assistant.
-- IF a repair involves: gas, mains voltage, live electrical, HVAC, refrigerants, pressurized systems, structural components, SET "blocked": true.
+- IF a repair involves: gas, mains voltage, live electrical, HVAC, refrigerants, pressurized systems, OR BUILDING structural components (walls, beams, foundations), SET "blocked": true.
 - ALWAYS provide clear safety warnings in the "diy.safety" array.`;
   const task = `YOUR TASK:
 You are a helpful DIY repair assistant. You will receive a user's profile and a pre-made diagnosis.
@@ -140,6 +152,7 @@ async function parseModelResponse(modelResponse, zodSchema) {
     }
   }
   if (!data) throw new Error("Model returned empty or invalid JSON response.");
+  
   const parsed = zodSchema.safeParse(data);
   if (!parsed.success) {
     console.error("Zod schema validation failed:", parsed.error.errors);
