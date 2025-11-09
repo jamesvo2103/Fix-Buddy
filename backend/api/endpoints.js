@@ -185,49 +185,4 @@ router.get('/search/videos', async (req, res) => {
 });
 
 
-router.get('/search/places', async (req, res) => {
-  try {
-    const address = String(req.query.address || '');
-    const query = String(req.query.query || 'repair');
-
-    if (!address) {
-      return res.status(400).json({
-        status: 'error',
-        code: 'BAD_REQUEST',
-        message: 'Query param "address" is required.'
-      });
-    }
-
-    // Convert address → lat/lng
-    const { geocodeAddress } = await import('../tools/geocode.js');
-    let coords;
-    try {
-      coords = await geocodeAddress(address);
-    } catch (err) {
-      return res.status(404).json({ status: 'error', code: 'NOT_FOUND', message: 'Address not found.' });
-    }
-
-    // Now call Places API using coords
-    try {
-      const places = require('../tools/places');
-      if (places && typeof places.search === 'function') {
-        const list = await places.search({ location: coords, query, max: 3 });
-        return res.json({ status: 'ok', places: list });
-      }
-    } catch {
-      // fallthrough to 501
-    }
-
-    return res.status(501).json({
-      status: 'error',
-      code: 'NOT_IMPLEMENTED',
-      message:
-        'Places search not implemented. Create `backend/tools/places.js` exporting `search({ location:{lat,lng}, query, max })`.'
-    });
-  } catch (err) {
-    console.error('GET /api/search/places error:', err);
-    return res.status(500).json({ status: 'error', code: 'SERVER_ERROR', message: 'Internal server error.' });
-  }
-});
-
 export default router;
