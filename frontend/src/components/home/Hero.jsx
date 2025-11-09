@@ -34,12 +34,12 @@ const Hero = () => {
           </a>
 
           <div className="hidden md:block space-x-3">
-            <Link to='/app?state=register'>
+            <Link to='/login?state=register'>
                 <button className="px-6 py-2 bg-purple-600 hover:bg-purple-700 transition text-white rounded-md">
                 Get started
                 </button>
             </Link>
-            <Link to='/app?state=login'>
+            <Link to='/login?state=login'>
                 <button className="hover:bg-slate-300/20 transition px-6 py-2 border border-slate-400 rounded-md">
                 Login
                 </button>
@@ -61,7 +61,7 @@ const Hero = () => {
         </p>
 
         <div className="flex items-center gap-4 mt-8">
-            <Link to='/app?state=register'>
+            <Link to='/login?state=register'>
                 <button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white active:scale-95 rounded-lg px-7 h-11">
                     Get started
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

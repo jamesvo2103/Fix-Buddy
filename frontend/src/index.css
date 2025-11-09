@@ -11,4 +11,10 @@
   button {
     @apply cursor-pointer;
   }
+  input:not([type="checkbox"]) {
+    @apply outline-none focus:ring border border-gray-300 focus:ring-purple-500 focus:border-purple-500 rounded-lg;
+  }
+  textarea {
+    @apply outline-none focus:ring border border-gray-300 focus:ring-purple-500 focus:border-purple-500 rounded-lg resize-none;
+  }
 }

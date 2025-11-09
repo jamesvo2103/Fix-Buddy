@@ -6,19 +6,19 @@ import Dashboard from './pages/Dashboard'
 import FixBuddy from './pages/FixBuddy'
 import Login from './pages/Login'
 
+
 const App = () => {
   return (
     <>
       <Routes>
         <Route path='/' element={<Home />}/>
 
-        <Route path='app' element={<Layout />}>
+        <Route path='/app' element={<Layout />}>
           <Route index element={<Dashboard />}/>
           <Route path='fixbuddy/:fixBuddyId' element={<FixBuddy />}/>
         </Route>
 
-        <Route path='login' element={<Login />}/>
-
+        <Route path='/login' element={<Login />}/>
       </Routes>
     </>
   )

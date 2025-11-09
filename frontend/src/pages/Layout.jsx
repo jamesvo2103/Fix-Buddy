@@ -1,13 +1,19 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { useSelector } from 'react-redux'
 import Loader from '../components/Loader'
 import Login from './Login'
 
 const Layout = () => {
+  const { user, loading } = useSelector(state => state.auth)
+  const navigate = useNavigate()
 
-  const {user, loading} = useSelector(state => state.auth)
+  useEffect(() => {
+    if (!user && !loading) {
+      navigate('/login')
+    }
+  }, [user, loading, navigate])
 
   if (loading) {
     return <Loader />
@@ -24,7 +30,6 @@ const Layout = () => {
         )
         : <Login />
       }
-      
     </div>
   )
 }
