@@ -99,9 +99,9 @@ All pages are fully responsive and optimized for mobile and tablet viewing.
 
 ## 👩‍💻 Authors
 
-**Andrea Tran - tran3ah@mail.uc.edu**  
+**Andrea Tran | tran3ah@mail.uc.edu**  
 Computer Engineering - University of Cincinnati, Class of 2029  
-**James Vo - vongochieu2103@gmail.com**  
+**James Vo | vongochieu2103@gmail.com**  
 Computer Engineering - Villanova University, Class of 2028
 
 ---
