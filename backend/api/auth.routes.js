@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { Router } from 'express';
-import { User } from '../models/schema.js';
+// --- FIXED IMPORT ---
+import { User } from '../models/User.js';
 
 const loginRouter = Router();
 
