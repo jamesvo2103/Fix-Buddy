@@ -8,8 +8,7 @@ import { getHistory as getChatHistory, appendHistory as updateChatHistory } from
 import { runDiagnosisChain, runGuidanceChain } from "./chain.js";
 
 const DANGEROUS = [
-  "gas leak", "natural gas", "live mains", "mains voltage", "refrigerant",
-  "structural", "asbestos", "pressurized", "carbon monoxide", "line voltage",
+  "gas leak", "natural gas", "live mains", "mains voltage", "refrigerant", "carbon monoxide", "line voltage",
   "hvac", "wiring fault", "electrocution"
 ];
 

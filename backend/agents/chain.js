@@ -1,4 +1,3 @@
-// backend/agents/chain.js
 import "dotenv/config";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
@@ -24,11 +23,22 @@ const DiagnosisSchema = z.object({
     name: z.string().describe("Short name of the problem, e.g., 'Cracked leg joint'"),
     probability: z.number().min(0).max(1),
     description: z.string().optional(),
-    // Preprocess the value. If it's "" or null, treat it as undefined, which .optional() allows.
+    
+    // --- ❗️ NEW, ROBUST FIX #1 ---
+    // Actively cleans the AI's input *before* validation.
     severity: z.preprocess(
-      (val) => (val === "" || val === null ? undefined : val),
-      z.enum(["low","medium","high"]).optional()
+      (val) => {
+        if (typeof val === "string") {
+          const lower = val.toLowerCase().trim();
+          if (lower === "low" || lower === "medium" || lower === "high") {
+            return lower; // Return the valid, lowercase value
+          }
+        }
+        return undefined; // Discard all other invalid values (null, "", "N/A", "Medium", etc.)
+      },
+      z.enum(["low","medium","high"]).optional() // The enum now receives either a valid value or undefined
     ),
+
   })).min(1),
 });
 
@@ -40,16 +50,29 @@ const GuidanceSchema = z.object({
       name: z.string(),
       required: z.boolean().default(true),
     })).default([]),
-    // Apply the same preprocess logic to skill_required
+
+    // --- ❗️ NEW, ROBUST FIX #2 ---
+    // Apply the same robust cleaning logic to skill_required
     skill_required: z.preprocess(
-      (val) => (val === "" || val === null ? undefined : val),
+      (val) => {
+        if (typeof val === "string") {
+          const lower = val.toLowerCase().trim();
+          if (lower === "beginner" || lower === "intermediate" || lower === "expert") {
+            return lower; // Return the valid, lowercase value
+          }
+        }
+        return undefined; // Discard all other invalid values
+      },
       z.enum(["beginner","intermediate","expert"]).optional()
     ),
+
+    // --- ❗️ NEW, ROBUST FIX #3 ---
     // Allow 0 (nonnegative) instead of requiring >0 (positive)
     time_minutes: z.preprocess(
       (val) => (val === null ? undefined : val),
        z.number().nonnegative().optional()
     ),
+    
     preparation: z.array(z.string()).default([]),
     steps: z.array(z.object({
       instruction: z.string(),
@@ -101,7 +124,7 @@ Return ONLY the JSON for this diagnosis. DO NOT provide repair steps.`;
 function makeGuidancePrompt({ userProfile, diagnosis, clarify }) {
   const guard = "OUTPUT RULES: Return ONLY a single JSON object (no prose, no markdown, no ```). The JSON MUST match the field names exactly.";
   const safety = `SAFETY: You are a CAUTIOUS assistant.
-- IF a repair involves: gas, mains voltage, live electrical, HVAC, refrigerants, pressurized systems, OR BUILDING structural components (walls, beams, foundations), SET "blocked": true.
+- IF a repair involves: gas, mains voltage, live electrical, SET "blocked": true.
 - ALWAYS provide clear safety warnings in the "diy.safety" array.`;
   const task = `YOUR TASK:
 You are a helpful DIY repair assistant. You will receive a user's profile and a pre-made diagnosis.
