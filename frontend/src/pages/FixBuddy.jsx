@@ -20,7 +20,7 @@ const FixBuddy = () => {
   const navigate = useNavigate()
 
   const [step, setStep] = useState(diagnosisId ? 3 : 1) // 1: Input, 2: Upload, 3: Results
-  const [inputType, setInputType] = useState('image') // Default to image
+  //const [inputType, setInputType] = useState('image') // Default to image
   const [imageFile, setImageFile] = useState(null)
   const [textInput, setTextInput] = useState('')
   const [isLoading, setIsLoading] = useState(!!diagnosisId) // Be loading if we have an ID
@@ -181,6 +181,7 @@ const FixBuddy = () => {
                 <input
                   type='file'
                   accept='image/png, image/jpeg'
+                  capture='environment'
                   hidden
                   onChange={handleImageUpload}
                 />

@@ -1,7 +1,7 @@
-// backend/agents/orchestrator.js
+
 import youtube from "../services/youtube.js";
 import geminiTool from "../services/gemini.js";
-// --- FIXED IMPORTS ---
+
 import { User as UserModel } from "../models/User.js";
 import { Diagnosis as DiagnosisModel } from "../models/Diagnosis.js";
 import { getHistory as getChatHistory, appendHistory as updateChatHistory } from "../models/Conversation.js";
@@ -12,7 +12,7 @@ const DANGEROUS = [
   "hvac", "wiring fault", "electrocution"
 ];
 
-/** Normalize chain or gemini output to DB schema */
+
 function normalizeResult(partial = {}) {
   const toolsArr = Array.isArray(partial.diy?.tools) ? partial.diy.tools : [];
   const stepsArr = Array.isArray(partial.diy?.steps) ? partial.diy.steps : [];
@@ -60,9 +60,7 @@ function normalizeResult(partial = {}) {
   };
 }
 
-/**
- * Main Repair Agent Entry Point
- */
+
 export default async function runAgent(payload) {
   const {
     userId = null,
@@ -73,7 +71,6 @@ export default async function runAgent(payload) {
     clarifyAnswer = null,
   } = payload || {};
 
-  // 1️⃣ Load user profile & history
   let profile = { experience, toolsOwned: tools, language: "en", riskTolerance: "low" };
   let history = [];
   if (userId) {
@@ -93,14 +90,14 @@ export default async function runAgent(payload) {
     }
   }
 
-  // 2️⃣ --- REFACTORED: Run 2-step chain → fallback to Gemini ---
+
   let analysis;
   try {
-    // Step 2a: Run Diagnosis Chain
+
     console.log("Running Diagnosis Chain...");
     const diagnosisResult = await runDiagnosisChain({ description, imageBase64 });
 
-    // Step 2b: Run Guidance Chain
+
     console.log("Running Guidance Chain...");
     const guidanceResult = await runGuidanceChain({
       userProfile: profile,
@@ -109,7 +106,7 @@ export default async function runAgent(payload) {
       clarifyAnswer,
     });
 
-    // Step 2c: Combine results
+
     analysis = { ...diagnosisResult, ...guidanceResult };
 
   } catch (e) {
@@ -123,7 +120,7 @@ export default async function runAgent(payload) {
     });
   }
 
-  // Guarantee minimal shape (This logic is still needed for the fallback)
+
   analysis = {
     item_name: analysis?.item_name || null,
     brand_model: analysis?.brand_model || null,
@@ -133,7 +130,7 @@ export default async function runAgent(payload) {
       safety: Array.isArray(analysis?.diy?.safety) ? analysis.diy.safety : ["Safety information not available"],
       tools: Array.isArray(analysis?.diy?.tools) ? analysis.diy.tools : [],
       steps: Array.isArray(analysis?.diy?.steps) ? analysis.diy.steps : [],
-      parts: Array.isArray(analysis.diy?.parts) ? analysis.diy.parts : [], // Pass array, normalizeResult will handle format
+      parts: Array.isArray(analysis.diy?.parts) ? analysis.diy.parts : [], 
       time_minutes: analysis?.diy?.time_minutes ?? null,
     },
     blocked: Boolean(analysis?.blocked),
@@ -141,7 +138,7 @@ export default async function runAgent(payload) {
     videos: analysis?.videos ?? [],
   };
 
-  // 3️⃣ Safety hard-block
+
   const blob = JSON.stringify({ description, analysis }).toLowerCase();
   const dangerWord = DANGEROUS.find((k) => blob.includes(k));
   if (dangerWord || analysis.blocked) {
@@ -160,7 +157,7 @@ export default async function runAgent(payload) {
     };
   }
 
-  // 4️⃣ YouTube tutorials
+
   const searchQuery = analysis.item_name
     ? `${analysis.item_name} ${analysis.issues?.[0]?.name || analysis.issues?.[0]?.problem || ""} repair`
     : `${description || "repair"} guide`;
@@ -179,7 +176,7 @@ export default async function runAgent(payload) {
     console.warn("⚠️ YouTube fetch failed:", e.message);
   }
 
-  // 5️⃣ Normalize & save
+
   const result = normalizeResult({ ...analysis, videos: tutorials });
 
   if (userId) {

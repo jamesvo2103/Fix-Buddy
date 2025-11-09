@@ -10,13 +10,13 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-// --- Helper for string/null-to-undefined preprocessing ---
+
 const emptyToUndefined = z.preprocess(
   (val) => (val === "" || val === null ? undefined : val),
   z.any().optional()
 );
 
-// --- Schema 1 (For Diagnosis) ---
+
 const DiagnosisSchema = z.object({
   item_name: z.string().nullable().describe("The specific name of the item, e.g., 'Wooden dining chair'"),
   brand_model: z.string().nullable().describe("The brand or model, if identifiable"),
@@ -30,25 +30,24 @@ const DiagnosisSchema = z.object({
     probability: z.number().min(0).max(1),
     description: z.string().optional(),
     
-    // --- ❗️ THIS IS THE FIX ---
-    // Preprocess the value. If it's "" or null, treat it as undefined, which .optional() allows.
+
     severity: z.preprocess(
       (val) => {
         if (typeof val === "string") {
           const lower = val.toLowerCase().trim();
           if (lower === "low" || lower === "medium" || lower === "high") {
-            return lower; // Return the valid, lowercase value
+            return lower; 
           }
         }
-        return undefined; // Discard all other invalid values (null, "", "N/A", etc.)
+        return undefined; 
       },
-      z.enum(["low","medium","high"]).optional() // The enum now receives either a valid value or undefined
+      z.enum(["low","medium","high"]).optional() 
     ),
 
   })).min(1),
 });
 
-// --- Schema 2 (For Guidance) ---
+
 const GuidanceSchema = z.object({
   diy: z.object({
     safety: z.array(z.string()).min(1),
@@ -57,23 +56,23 @@ const GuidanceSchema = z.object({
       required: z.boolean().default(true),
     })).default([]),
 
-    // --- ❗️ THIS IS THE FIX for the *next* error you would see ---
+  
     skill_required: z.preprocess(
       (val) => {
         if (typeof val === "string") {
           const lower = val.toLowerCase().trim();
           if (lower === "beginner" || lower === "intermediate" || lower === "expert") {
-            return lower; // Return the valid, lowercase value
+            return lower; 
           }
         }
-        return undefined; // Discard all other invalid values
+        return undefined; 
       },
       z.enum(["beginner","intermediate","expert"]).optional()
     ),
 
     time_minutes: z.preprocess(
       (val) => (val === null ? undefined : val),
-       z.number().nonnegative().optional() // Allows 0 or null
+       z.number().nonnegative().optional() 
     ),
     
     preparation: z.array(z.string()).default([]),
@@ -93,9 +92,7 @@ const GuidanceSchema = z.object({
   confidence_overall: z.number().min(0).max(1),
 });
 
-/**
- * Creates a strict JSON prompt for the Diagnosis step.
- */
+
 function makeDiagnosisPrompt({ description }) {
   const guard = "OUTPUT RULES: Return ONLY a single JSON object (no prose, no markdown, no ```). The JSON MUST match the field names exactly.";
   const task = `YOUR TASK:
@@ -121,9 +118,7 @@ Return ONLY the JSON for this diagnosis. DO NOT provide repair steps.`;
   ];
 }
 
-/**
- * Creates a strict JSON prompt for the Guidance step.
- */
+
 function makeGuidancePrompt({ userProfile, diagnosis, clarify }) {
   const guard = "OUTPUT RULES: Return ONLY a single JSON object (no prose, no markdown, no ```). The JSON MUST match the field names exactly.";
   const safety = `SAFETY: You are a CAUTIOUS assistant.
@@ -153,9 +148,7 @@ Your ONLY job is to generate the step-by-step guidance to fix the problem.
   ];
 }
 
-/**
- * Helper to parse model output robustly
- */
+
 async function parseModelResponse(modelResponse, zodSchema) {
   const text = typeof modelResponse?.response?.text === "function" 
     ? modelResponse.response.text() 
@@ -187,9 +180,7 @@ async function parseModelResponse(modelResponse, zodSchema) {
   return parsed.data;
 }
 
-/**
- * Agent 1 - Runs Diagnosis
- */
+
 export async function runDiagnosisChain({ description, imageBase64 }) {
   const parts = makeDiagnosisPrompt({ description });
   if (imageBase64) {
@@ -208,9 +199,7 @@ export async function runDiagnosisChain({ description, imageBase64 }) {
   }
 }
 
-/**
- * Agent 2 - Runs Guidance
- */
+
 export async function runGuidanceChain({ userProfile, history, diagnosis, clarifyAnswer }) {
   const parts = makeGuidancePrompt({
     userProfile,
