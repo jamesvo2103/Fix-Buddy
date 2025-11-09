@@ -1,37 +1,26 @@
-import React, { useEffect } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import { useSelector } from 'react-redux'
-import Loader from '../components/Loader'
-import Login from './Login'
+// frontend/src/pages/Layout.jsx
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Navbar from '../components/Navbar.jsx'; // Correct path
+import { useSelector } from 'react-redux';
+import Loader from '../components/Loader.jsx'; // Correct path
 
 const Layout = () => {
-  const { user, loading } = useSelector(state => state.auth)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (!user && !loading) {
-      navigate('/login')
-    }
-  }, [user, loading, navigate])
+  const { loading } = useSelector(state => state.auth);
 
   if (loading) {
-    return <Loader />
+    return <Loader />;
   }
 
   return (
-    <div>
-      {
-        user ? (
-          <div className='min-h-screen bg-black'>
-            <Navbar/>
-            <Outlet />
-          </div>
-        )
-        : <Login />
-      }
+    <div className="min-h-screen bg-black">
+      <Navbar />
+      {/* Removed container for more flexibility on child pages */}
+      <main>
+        <Outlet /> 
+      </main>
     </div>
-  )
+  );
 }
 
-export default Layout
+export default Layout;
