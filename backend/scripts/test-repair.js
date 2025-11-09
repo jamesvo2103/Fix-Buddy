@@ -1,15 +1,15 @@
 // backend/scripts/test-repair.js
-import runAgent from '../agents/orchestrator.js'; // <-- ❗️ UPDATED PATH
+import runAgent from '../agents/orchestrator.js'; 
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs/promises';
 
-dotenv.config({ path: join(dirname(fileURLToPath(import.meta.url)), '../.env') }); // Ensure .env is found from scripts/
+dotenv.config({ path: join(dirname(fileURLToPath(import.meta.url)), '../.env') }); 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const testImagePath = join(__dirname, '../test-image.jpg'); // Path is now relative from scripts/
+const testImagePath = join(__dirname, '../test-image.jpg'); 
 
 async function main() {
   console.log('🚀 Starting Fix-Buddy image-first test...');
@@ -17,17 +17,17 @@ async function main() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    // Use a vague, realistic description to test the AI's image analysis
-    const description = 'My wooden table leg is broken.'; // <-- ✨ IMPROVED DESCRIPTION
+ 
+    const description = 'My wooden table leg is broken.'; 
 
     const imageBase64 = await fs.readFile(testImagePath, { encoding: 'base64' });
     const payload = {
-      // NOTE: For a real test, create a user in your DB and use their actual ObjectId
-      userId: '672f77e6e5a10065606448e1', // Use a valid ObjectId format
+ 
+      userId: '672f77e6e5a10065606448e1', 
       description,
       imageBase64: `data:image/jpeg;base64,${imageBase64}`,
       experience: 'beginner',
-      tools: ['screwdriver'] // Intentionally provide a partial list
+      tools: ['screwdriver']
     };
 
     console.log('\n🖼️ Running diagnosis (image-first)...');
@@ -39,7 +39,7 @@ async function main() {
     console.log('Issues:', result.issues);
     console.log('Safety:', result.diagnosis.safety);
     console.log('Tools:', result.diagnosis.tools);
-    console.log('Steps:', result.diagnosis.steps.slice(0, 3)); // Log first 3 steps
+    console.log('Steps:', result.diagnosis.steps.slice(0, 3)); 
     console.log('Tutorials:', result.tutorials);
 
   } catch (e) {

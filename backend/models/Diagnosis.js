@@ -5,10 +5,10 @@ const diagnosisSchema = new mongoose.Schema({
   itemName: { type: String, required: true },
   itemModel: String,
   repairabilityScore: Number,
-  repairabilityConfidence: String, // You had this in orchestrator, good to add
+  repairabilityConfidence: String, 
   issues: [{
     problem: String,
-    probability: Number, // You had this in orchestrator, good to add
+    probability: Number, 
   }],
   diagnosis: {
     safety: String,
@@ -18,9 +18,9 @@ const diagnosisSchema = new mongoose.Schema({
       name: String,
       estimatedCost: Number
     }],
-    timeEstimate: Number, // You had this in orchestrator, good to add
+    timeEstimate: Number, 
   },
-  nearbyShops: [{ // This was in your old schema.js, keeping it
+  nearbyShops: [{ 
     name: String,
     address: String,
     rating: Number,

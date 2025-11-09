@@ -69,7 +69,7 @@ export async function getHistory(userId, options = {}) {
     msgs = msgs.filter((m) => String(m.metadata?.diagnosisId || "") === String(conv.activeRepair.diagnosisId));
   }
 
-  // Update last active (best-effort, non-blocking)
+
   try {
     await Conversation.updateOne({ _id: conv._id }, { $set: { "stats.lastActive": new Date() } });
   } catch {}

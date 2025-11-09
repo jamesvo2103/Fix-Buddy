@@ -12,12 +12,8 @@ export const userExtractor = async (req, res, next) => {
         return res.status(401).json({ error: 'Token invalid' });
       }
 
-      // Attach the user's id to the request
       req.user = { id: decodedToken.id, username: decodedToken.username };
 
-      // --- ❗️ THIS IS THE FIX ---
-      // next() must be called *inside* the 'try' block
-      // to continue to the next route.
       next(); 
       
     } catch (error) {
@@ -25,10 +21,6 @@ export const userExtractor = async (req, res, next) => {
       return res.status(401).json({ error: 'Token expired or invalid' });
     }
   } else {
-    // If no token, just return an error. Do not call next().
     return res.status(401).json({ error: 'Token missing' });
   }
-
-  // --- BUG ---
-  // The 'next()' call was here, which was wrong.
 };

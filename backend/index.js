@@ -4,15 +4,11 @@ import express from 'express';
 import cors from 'cors';
 import connectDB from './db/connect.js';
 import mainApiRouter from './api/index.js';
-// You'll need middleware for auth, e.g., to get 'req.user'
-// import { userExtractor } from './middleware/auth.js'; 
 
 const app = express();
 
-// --- Connect to Database ---
 connectDB();
 
-// --- Middleware ---
 const corsOptions = {
       origin: process.env.FRONTEND_URL
     };
@@ -20,11 +16,10 @@ const corsOptions = {
     
     app.use(express.json({ limit: '5mb' }));
 
-// --- Routes ---
-// This one line imports all your routes
+
 app.use('/api', mainApiRouter); 
 
-// --- Error Handling (Example) ---
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send({ error: 'Something broke!' });
