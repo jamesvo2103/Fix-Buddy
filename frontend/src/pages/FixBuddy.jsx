@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, Upload, Loader, AlertCircle, CheckCircle, MapPin, Youtube, Volume2, Save, ChevronDown } from 'lucide-react'
+import { ArrowLeftIcon, Upload, Loader, AlertCircle, Youtube, Volume2, Save, ChevronDown } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
@@ -11,37 +11,20 @@ const FixBuddy = () => {
   const navigate = useNavigate()
 
   const [step, setStep] = useState(1) // 1: Input, 2: Upload, 3: Results
-  const [inputType, setInputType] = useState('') // 'image' or 'text'
+  const [inputType, setInputType] = useState('')
   const [imageFile, setImageFile] = useState(null)
   const [textInput, setTextInput] = useState('')
   const [itemModel, setItemModel] = useState('')
-  const [location, setLocation] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   
   const [diagnosis, setDiagnosis] = useState(null)
   const [clarifyQuestion, setClarifyQuestion] = useState(null)
   const [clarifyAnswer, setClarifyAnswer] = useState(null)
 
-  const [activeTab, setActiveTab] = useState('overview') // 'overview', 'steps', 'tutorials', 'nearby'
+  const [activeTab, setActiveTab] = useState('overview') // 'overview', 'steps', 'tutorials'
   const [isSpeaking, setIsSpeaking] = useState(false)
 
-  // Get user location
-  const getUserLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          })
-        },
-        (error) => console.log('Location access denied')
-      )
-    }
-  }
-
   useEffect(() => {
-    getUserLocation()
     if (diagnosisId) {
       loadExistingDiagnosis()
     }
@@ -89,11 +72,6 @@ const FixBuddy = () => {
 
       if (itemModel) {
         formData.append('itemModel', itemModel)
-      }
-
-      if (location) {
-        formData.append('latitude', location.lat)
-        formData.append('longitude', location.lng)
       }
 
       if (clarifyAnswer !== null) {
@@ -324,8 +302,7 @@ const FixBuddy = () => {
                 {[
                   { id: 'overview', label: '📋 Overview' },
                   { id: 'steps', label: '👷 DIY Steps' },
-                  { id: 'tutorials', label: '🎬 Tutorials' },
-                  { id: 'nearby', label: '🏪 Repair Shops' }
+                  { id: 'tutorials', label: '🎬 Tutorials' }
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -365,9 +342,7 @@ const FixBuddy = () => {
                   {/* Tools List */}
                   {diagnosis.diagnosis.tools && diagnosis.diagnosis.tools.length > 0 && (
                     <div>
-                      <h4 className='font-bold mb-3 flex items-center gap-2'>
-                        🔧 Tools Needed
-                      </h4>
+                      <h4 className='font-bold mb-3'>🔧 Tools Needed</h4>
                       <ul className='space-y-2'>
                         {diagnosis.diagnosis.tools.map((tool, idx) => (
                           <li key={idx} className='flex gap-2 text-purple-200'>
@@ -410,7 +385,7 @@ const FixBuddy = () => {
                   <ol className='space-y-4'>
                     {diagnosis.diagnosis.steps?.map((step, idx) => (
                       <li key={idx} className='flex gap-4'>
-                        <span className='text-purple-400 font-bold flex-shrink-0 bg-purple-900/50 w-8 h-8 rounded-full flex items-center justify-center'>
+                        <span className='text-purple-400 font-bold shrink-0 bg-purple-900/50 w-8 h-8 rounded-full flex items-center justify-center'>
                           {idx + 1}
                         </span>
                         <span className='text-purple-200 pt-1'>{step}</span>
@@ -432,40 +407,16 @@ const FixBuddy = () => {
                         rel='noopener noreferrer'
                         className='flex gap-4 p-4 bg-purple-900/30 border border-purple-600/30 rounded-lg hover:border-purple-400 transition-all'
                       >
-                        <Youtube className='size-6 text-red-500 flex-shrink-0' />
+                        <Youtube className='size-6 text-red-500 shrink-0' />
                         <div className='flex-1 min-w-0'>
                           <p className='font-semibold text-purple-300 line-clamp-2'>{tutorial.title}</p>
                           <p className='text-sm text-purple-400'>{tutorial.source || 'Video'}</p>
                         </div>
-                        <ChevronDown className='size-5 text-purple-400 flex-shrink-0 rotate-180' />
+                        <ChevronDown className='size-5 text-purple-400 shrink-0 rotate-180' />
                       </a>
                     ))
                   ) : (
                     <p className='text-purple-400 text-center py-8'>No tutorials found</p>
-                  )}
-                </div>
-              )}
-
-              {activeTab === 'nearby' && diagnosis.nearbyShops && (
-                <div className='space-y-4'>
-                  <h3 className='text-lg font-bold mb-4'>Nearby Repair Services</h3>
-                  {diagnosis.nearbyShops.length > 0 ? (
-                    diagnosis.nearbyShops.map((shop, idx) => (
-                      <div key={idx} className='p-4 bg-purple-900/30 border border-purple-600/30 rounded-lg'>
-                        <div className='flex items-start justify-between mb-2'>
-                          <p className='font-semibold text-purple-300'>{shop.name}</p>
-                          <div className='flex items-center gap-1 text-yellow-400 text-sm'>
-                            ⭐ {shop.rating || 'N/A'}
-                          </div>
-                        </div>
-                        <div className='flex items-center gap-2 text-purple-400 text-sm'>
-                          <MapPin className='size-4' />
-                          {shop.address}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className='text-purple-400 text-center py-8'>No nearby shops found</p>
                   )}
                 </div>
               )}
