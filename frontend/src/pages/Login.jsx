@@ -1,91 +1,71 @@
+import { Lock, Mail, User2Icon } from 'lucide-react'
 import React from 'react'
+import api from '../configs/api.js'
+import { useDispatch } from 'react-redux'
+import { login } from '../app/features/authSlice.js'
+import toast from 'react-hot-toast'
 
 const Login = () => {
-    // state for login or register
-    const query = new URLSearchParams(window.location.search)
-    const urlState = query.get('state')
-    const [state, setState] = React.useState(urlState || "login");
 
-    // state for input value
-    const [data, setData] = React.useState({
-        name: "",
-        email: "",
-        password: "",
-    });
+    const dispatch = useDispatch()
 
-    // handle change input value
-    const onChangeHandler = (e) => {
-        setData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    };
+  const query = new URLSearchParams(window.location.search)
+  const urlState = query.get('state')
+  const [state, setState] = React.useState(urlState || "login")
 
-    // handle submit form
-    const handleSubmit = (e) => {
-        e.preventDefault();
-    };
+  const [formData, setFormData] = React.useState({
+      name: '',
+      email: '',
+      password: ''
+  })
 
-    return (
-        <div className='flex items-center justify-center min-h-screen bg-black'>
-            <form
-                onSubmit={handleSubmit}
-                className="w-full sm:w-[350px] text-center border border-purple-700/40 rounded-2xl px-8 bg-purple-950"
-            >
-                <h1 className="text-white text-3xl mt-10 font-medium">
-                    {state === "login" ? "Login" : "Register"}
-                </h1>
-                <p className="text-purple-200 text-sm mt-2 pb-6">
-                    Please {state === "login" ? "sign in" : "sign up"} to continue
-                </p>
+  const handleSubmit = async (e) => {
+      e.preventDefault()
+      try {
+        const { data } = await api.post(`/api/users/${state}`, formData)
+        dispatch(login(data))
+        localStorage.setItem('token', data.token)
+        toast.success(data.message)
+      } catch (error) {
+        toast(error?.response?.data?.message || error.message)
+      }
 
-                {state !== "login" && (
-                    <div className="flex items-center w-full mt-4 bg-purple-900 border border-purple-700/60 h-12 rounded-full overflow-hidden pl-6 gap-2">
-                        {/* User Icon */}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300" viewBox="0 0 24 24" >
-                            <path d="M20 21a8 8 0 0 0-16 0" />
-                            <circle cx="12" cy="7" r="4" />
-                        </svg>
-                        <input type="text" placeholder="Name" className="bg-transparent text-purple-50 placeholder-purple-400 outline-none text-sm w-full h-full" name="name" value={data.name} onChange={onChangeHandler} required />
-                    </div>
-                )}
+  }
 
-                <div className="flex items-center w-full mt-4 bg-purple-900 border border-purple-700/60 h-12 rounded-full overflow-hidden pl-6 gap-2">
-                    {/* Mail Icon */}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300" viewBox="0 0 24 24" >
-                        <rect width="20" height="16" x="2" y="4" rx="2" />
-                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                    </svg>
-                    <input type="email" placeholder="Email" className="bg-transparent text-purple-50 placeholder-purple-400 outline-none text-sm w-full h-full" name="email" value={data.email} onChange={onChangeHandler} required />
-                </div>
+  const handleChange = (e) => {
+      const { name, value } = e.target
+      setFormData(prev => ({ ...prev, [name]: value }))
+  }
 
-                <div className="flex items-center mt-4 w-full bg-purple-900 border border-purple-700/60 h-12 rounded-full overflow-hidden pl-6 gap-2">
-                    {/* Lock Icon */}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300" viewBox="0 0 24 24" >
-                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                    <input type="password" placeholder="Password" className="bg-transparent text-purple-50 placeholder-purple-400 outline-none text-sm w-full h-full" name="password" value={data.password} onChange={onChangeHandler} required />
-                </div>
-
-                <div className="mt-5 text-left">
-                    <a className="text-sm text-purple-300 hover:text-purple-200 transition" href="#" >
-                        Forgot password?
-                    </a>
-                </div>
-
-                <button type="submit" className="mt-2 w-full h-11 rounded-full text-white bg-purple-600 hover:bg-purple-500 transition-colors" >
-                    {state === "login" ? "Login" : "Create Account"}
-                </button>
-
-                <p className="text-purple-200 text-sm mt-3 mb-11">
-                    {state === "login"
-                        ? "Don't have an account? "
-                        : "Already have an account? "}
-                    <button type="button" className="text-purple-300 hover:text-purple-200 transition" onClick={() => setState((prev) => prev === "login" ? "register" : "login")} >
-                        {state === "login" ? "Register" : "Login"}
-                    </button>
-                </p>
-            </form>
-        </div>
-    )
+  return (
+    <div className='flex items-center justify-center min-h-screen bg-gray-50'>
+        <form onSubmit={handleSubmit} className="sm:w-[350px] w-full text-center border border-gray-300/60 rounded-2xl px-8 bg-white">
+          <h1 className="text-gray-900 text-3xl mt-10 font-medium">{state === "login" ? "Login" : "Sign up"}</h1>
+          <p className="text-gray-500 text-sm mt-2">Please {state} to continue</p>
+          {state !== "login" && (
+              <div className="flex items-center mt-6 w-full bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
+                  <User2Icon size={16} color='#6B7280'/>
+                  <input type="text" name="name" placeholder="Name" className="border-none outline-none ring-0" value={formData.name} onChange={handleChange} required />
+              </div>
+          )}
+          <div className="flex items-center w-full mt-4 bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
+              <Mail size={13} color='#6B7280'/>
+              <input type="email" name="email" placeholder="Email" className="border-none outline-none ring-0" value={formData.email} onChange={handleChange} required />
+          </div>
+          <div className="flex items-center mt-4 w-full bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
+              <Lock size={13} color='#6B7280'/>
+              <input type="password" name="password" placeholder="Password" className="border-none outline-none ring-0" value={formData.password} onChange={handleChange} required />
+          </div>
+          <div className="mt-4 text-left text-purple-500">
+              <button className="text-sm" type="reset">Forget password?</button>
+          </div>
+          <button type="submit" className="mt-2 w-full h-11 rounded-full text-white bg-purple-500 hover:opacity-90 transition-opacity">
+              {state === "login" ? "Login" : "Sign up"}
+          </button>
+          <p onClick={() => setState(prev => prev === "login" ? "register" : "login")} className="text-gray-500 text-sm mt-3 mb-11">{state === "login" ? "Don't have an account?" : "Already have an account?"} <a href="#" className="text-purple-500 hover:underline">click here</a></p>
+      </form>
+    </div>
+  )
 }
 
 export default Login
