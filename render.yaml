@@ -1,0 +1,52 @@
+services:
+  # 1. The Database (MongoDB)
+  - type: pserv
+    name: fix-buddy-db
+    plan: free # Use 'standard' or higher for production
+    mongoDBVersion: "7.0"
+
+  # 2. The Backend (Node.js Web Service)
+  - type: web
+    name: fix-buddy-api
+    plan: free # Use 'standard' or higher for production
+    runtime: node
+    rootDir: backend
+    buildFilter:
+      paths:
+      - backend/**
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGODB_URI
+        fromService:
+          type: pserv
+          name: fix-buddy-db
+          property: connectionString
+      - key: FRONTEND_URL
+        fromService:
+          type: static
+          name: fix-buddy-app
+          property: url
+      - key: GEMINI_API_KEY
+        sync: false # Set this in the Render dashboard
+      - key: YOUTUBE_API_KEY
+        sync: false # Set this in the Render dashboard
+      - key: SECRET
+        sync: false # Set this in the Render dashboard
+
+  # 3. The Frontend (React Static Site)
+  - type: static
+    name: fix-buddy-app
+    plan: free
+    rootDir: frontend
+    buildFilter:
+      paths:
+      - frontend/**
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: fix-buddy-api
+          property: url
