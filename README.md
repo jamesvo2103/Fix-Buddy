@@ -33,11 +33,11 @@ FixBuddy is an AI-powered web application that helps users diagnose and solve ho
 ## 🚩 Distinctiveness & Complexity
 
 FixBuddy stands out by combining:
-- **Multi-modal input** — accepts both images and text to maximize diagnostic coverage.
-- **Repairability Scoring** — provides a quantified, AI-driven "Can I fix it myself?" estimate.
-- **Dynamic tutorials** — fetches repair videos and guides tailored to your specific device and fault.
-- **Clarification logic** — intelligently queries for missing details only if necessary, reducing user frustration.
-- **No third-party mapping dependencies** — all local shop suggestions are handled without Google Maps, for privacy and portability.
+- **Multi-modal input** - accepts both images and text to maximize diagnostic coverage.
+- **Repairability Scoring** - provides a quantified, AI-driven "Can I fix it myself?" estimate.
+- **Dynamic tutorials** - fetches repair videos and guides tailored to your specific device and fault.
+- **Clarification logic** - intelligently queries for missing details only if necessary, reducing user frustration.
+- **No third-party mapping dependencies** - all local shop suggestions are handled without Google Maps, for privacy and portability.
 
 ---
 
