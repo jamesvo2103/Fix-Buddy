@@ -4,7 +4,7 @@ import geminiTool from "../services/gemini.js";
 // --- FIXED IMPORTS ---
 import { User as UserModel } from "../models/User.js";
 import { Diagnosis as DiagnosisModel } from "../models/Diagnosis.js";
-import { Conversation, getHistory as getChatHistory, appendHistory as updateChatHistory } from "../models/Conversation.js";
+import { getHistory as getChatHistory, appendHistory as updateChatHistory } from "../models/Conversation.js";
 import { runDiagnosisChain, runGuidanceChain } from "./chain.js";
 
 const DANGEROUS = [
