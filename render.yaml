@@ -1,3 +1,6 @@
+# render.yaml
+
+# Define the services (backend and database)
 services:
   # 1. The Database (MongoDB)
   - type: pserv
@@ -24,7 +27,7 @@ services:
           property: connectionString
       - key: FRONTEND_URL
         fromService:
-          type: static
+          type: staticSite # <-- This type also changed from 'static'
           name: fix-buddy-app
           property: url
       - key: GEMINI_API_KEY
@@ -34,9 +37,10 @@ services:
       - key: SECRET
         sync: false # Set this in the Render dashboard
 
-  # 3. The Frontend (React Static Site)
-  - type: static
-    name: fix-buddy-app
+# 3. The Frontend (React Static Site)
+# This is now its own top-level category
+staticSites:
+  - name: fix-buddy-app
     plan: free
     rootDir: frontend
     buildFilter:
