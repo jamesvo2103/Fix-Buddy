@@ -17,7 +17,6 @@ const Dashboard = () => {
   const loadDiagnoses = async () => {
     try {
       setIsLoading(true)
-      // This route now exists
       const { data } = await api.get('/diagnoses') 
       setDiagnoses(data.diagnoses || [])
     } catch (error) {
@@ -31,7 +30,6 @@ const Dashboard = () => {
     try {
       const confirm = window.confirm('Are you sure you want to delete this diagnosis?');
       if (confirm) {
-        // This route now exists
         await api.delete(`/diagnoses/${diagnosisId}`)
         setDiagnoses(diagnoses.filter(d => d._id !== diagnosisId))
         toast.success('Diagnosis deleted')
@@ -66,7 +64,7 @@ const Dashboard = () => {
 
         {/* New Diagnosis Button */}
         <button 
-          onClick={() => navigate('/app/fixbuddy')} // Corrected route
+          onClick={() => navigate('/app/fixbuddy')} 
           className='w-full sm:max-w-48 h-40 flex flex-col items-center justify-center rounded-lg gap-3 text-white border-2 border-dashed border-purple-500 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 bg-purple-950/30 group mb-8'
         >
           <PlusIcon className='size-12 text-purple-400 group-hover:scale-110 transition-all'/>
@@ -102,7 +100,7 @@ const Dashboard = () => {
                   }}
                 >
                   <div 
-                    onClick={() => navigate(`/app/fixbuddy/${diagnosis._id}`)} // Clickable area
+                    onClick={() => navigate(`/app/fixbuddy/${diagnosis._id}`)}
                     className="cursor-pointer"
                   >
                     {/* Item Name */}

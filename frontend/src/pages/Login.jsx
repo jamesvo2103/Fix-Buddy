@@ -10,7 +10,7 @@ import toast from 'react-hot-toast'
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const location = useLocation() // Import and use location
+  const location = useLocation()
   const [isLoading, setIsLoading] = React.useState(false)
 
   const query = new URLSearchParams(window.location.search)
@@ -21,7 +21,7 @@ const Login = () => {
     name: '',
     username: '',
     password: '',
-    experience: 'beginner' 
+    experience: 'beginner'
   })
 
   const onChangeHandler = (e) => {
@@ -35,10 +35,10 @@ const Login = () => {
       let responseData;
 
       if (state === 'login') {
-        // --- LOGIN LOGIC ---
+
         if (!data.username || !data.password) {
           toast.error('Please fill in all fields');
-          setIsLoading(false); // Stop loading
+          setIsLoading(false);
           return;
         }
 
@@ -51,7 +51,7 @@ const Login = () => {
         responseData = res;
 
       } else {
-        // --- REGISTER LOGIC ---
+
         const payload = {
           username: data.username,
           password: data.password,
@@ -61,10 +61,9 @@ const Login = () => {
         const { data: res } = await api.post('/users', payload);
         responseData = res;
       }
-
       // --- COMMON SUCCESS LOGIC ---
       if (responseData.token) {
-        // Store user info in Redux (which will also handle localStorage)
+
         dispatch(login({
           token: responseData.token,
           username: responseData.username,
@@ -75,11 +74,10 @@ const Login = () => {
       toast.success(responseData.message || `Successfully ${state === 'login' ? 'logged in' : 'registered'}!`);
 
       if (state === 'login') {
-        // Get the redirect path from state or default to /app
         const from = location?.state?.from?.pathname || '/app';
         navigate(from, { replace: true });
       } else {
-        // If registering, switch to login state and clear fields
+
         setState('login');
         setData({ name: '', username: '', password: '', experience: 'beginner' });
       }
@@ -173,8 +171,8 @@ const Login = () => {
           </div>
         )}
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={isLoading}
           className="mt-6 w-full h-11 rounded-full text-white bg-purple-600 hover:bg-purple-500 transition-all font-semibold flex items-center justify-center disabled:opacity-50"
         >
