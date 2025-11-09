@@ -1,4 +1,4 @@
-// frontend/src/pages/FixBuddy.jsx
+
 import { ArrowLeftIcon, Upload, Loader, AlertCircle, Youtube, Volume2, Save, ChevronDown } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux'
 import api from '../configs/api.js'
 import toast from 'react-hot-toast'
 
-// Helper function to convert a File to base64
 const toBase64 = file => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.readAsDataURL(file);
@@ -15,22 +14,21 @@ const toBase64 = file => new Promise((resolve, reject) => {
 });
 
 const FixBuddy = () => {
-  const { diagnosisId } = useParams() // This comes from the URL
+  const { diagnosisId } = useParams() 
   const { user } = useSelector(state => state.auth)
   const navigate = useNavigate()
 
-  const [step, setStep] = useState(diagnosisId ? 3 : 1) // 1: Input, 2: Upload, 3: Results
-  //const [inputType, setInputType] = useState('image') // Default to image
+  const [step, setStep] = useState(diagnosisId ? 3 : 1) 
   const [imageFile, setImageFile] = useState(null)
   const [textInput, setTextInput] = useState('')
-  const [isLoading, setIsLoading] = useState(!!diagnosisId) // Be loading if we have an ID
+  const [isLoading, setIsLoading] = useState(!!diagnosisId) 
   
   const [diagnosis, setDiagnosis] = useState(null)
   
-  const [activeTab, setActiveTab] = useState('overview') // 'overview', 'steps', 'tutorials'
+  const [activeTab, setActiveTab] = useState('overview') 
   const [isSpeaking, setIsSpeaking] = useState(false)
 
-  // Load existing diagnosis if ID is in URL
+  
   useEffect(() => {
     if (diagnosisId) {
       loadExistingDiagnosis()
@@ -45,7 +43,7 @@ const FixBuddy = () => {
       setStep(3)
     } catch (error) {
       toast.error('Failed to load diagnosis')
-      navigate('/app'); // Go back if it fails
+      navigate('/app'); 
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +52,7 @@ const FixBuddy = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
-      if (file.size > 8 * 1024 * 1024) { // 8MB size limit
+      if (file.size > 8 * 1024 * 1024) { 
         toast.error("Image is too large. Max 8MB.");
         return;
       }
@@ -62,7 +60,7 @@ const FixBuddy = () => {
     }
   }
 
-  // --- REWRITTEN SUBMIT FUNCTION ---
+
   const submitDiagnosis = async () => {
     if (!textInput && !imageFile) {
       toast.error('Please describe the problem or upload an image.');
@@ -76,23 +74,23 @@ const FixBuddy = () => {
         imageBase64 = await toBase64(imageFile);
       }
 
-      // This payload MUST match your backend's POST /api/agent route
+ 
       const payload = {
         description: textInput,
-        imageBase64: imageBase64, // Can be null
+        imageBase64: imageBase64,// Can be null
         experience: user?.experience || 'beginner',
-        // 'tools' is optional, backend handles it
+ 
       };
 
-      // Call the correct route: /api/agent
+
       const { data } = await api.post('/agent', payload);
 
-      // The backend 'orchestrator' saves the diagnosis, so data.result is the new diagnosis
+
       setDiagnosis(data.result); 
       setStep(3);
       toast.success('Diagnosis complete!');
 
-      // Navigate to the new URL for this diagnosis, so refresh works
+
       if (data.result._id) {
          navigate(`/app/fixbuddy/${data.result._id}`, { replace: true });
       }
@@ -116,7 +114,7 @@ const FixBuddy = () => {
     }
   }
   
-  // Stop speaking if component unmounts
+ 
   useEffect(() => {
     return () => window.speechSynthesis.cancel();
   }, []);
@@ -126,14 +124,14 @@ const FixBuddy = () => {
     setImageFile(null);
     setTextInput('');
     setDiagnosis(null);
-    navigate('/app/fixbuddy'); // Navigate to the clean form
+    navigate('/app/fixbuddy'); 
   }
 
   return (
     <div className='min-h-screen bg-black text-white'>
       <div className='max-w-6xl mx-auto px-4 py-6'>
 
-        {/* Back Button */}
+
         <button
           onClick={() => navigate('/app')}
           className='inline-flex gap-2 items-center text-purple-300 hover:text-purple-200 transition-all mb-6'
@@ -141,13 +139,13 @@ const FixBuddy = () => {
           <ArrowLeftIcon className='size-4' /> Back to Dashboard
         </button>
 
-        {/* ============ STEP 1: INPUT TYPE ============ */}
+
         {step === 1 && (
           <div className='max-w-2xl mx-auto'>
             <h1 className='text-3xl font-bold mb-2'>What needs fixing? 🔧</h1>
             <p className='text-purple-300 mb-8'>Take a photo, describe your issue, or both!</p>
 
-            {/* Go straight to Step 2 */}
+
             <button
               onClick={() => setStep(2)}
               className='w-full p-8 rounded-lg border-2 border-purple-600 hover:bg-purple-600/20 transition-all text-center'
@@ -158,7 +156,7 @@ const FixBuddy = () => {
           </div>
         )}
 
-        {/* ============ STEP 2: UPLOAD/INPUT ============ */}
+
         {step === 2 && (
           <div className='max-w-2xl mx-auto'>
             <h1 className='text-3xl font-bold mb-6'>
@@ -216,7 +214,7 @@ const FixBuddy = () => {
           </div>
         )}
 
-        {/* ============ STEP 3: RESULTS ============ */}
+
         {step === 3 && (isLoading ? (
           <div className='flex items-center justify-center py-40'>
             <div className='animate-spin'>
@@ -225,10 +223,10 @@ const FixBuddy = () => {
           </div>
         ) : diagnosis && (
           <div className='grid lg:grid-cols-3 gap-6'>
-            {/* Left: Results */}
+  
             <div className='lg:col-span-2'>
               
-              {/* --- SPECIAL: BLOCKED DIAGNOSIS --- */}
+   
               {diagnosis.blocked ? (
                 <div className='bg-red-900/20 border border-red-700/50 rounded-lg p-6 mb-6 text-center'>
                   <AlertCircle className="size-12 mx-auto text-red-400 mb-4" />
@@ -239,7 +237,6 @@ const FixBuddy = () => {
                 </div>
               ) : (
                 <>
-                  {/* Item & Score */}
                   <div className='bg-purple-950/50 border border-purple-600/50 rounded-lg p-6 mb-6'>
                     <h2 className='text-3xl font-bold'>{diagnosis.itemName}</h2>
                     {diagnosis.itemModel && (

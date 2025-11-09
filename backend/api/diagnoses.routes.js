@@ -1,13 +1,13 @@
-// backend/api/diagnoses.routes.js
+
 import { Router } from 'express';
 import { Diagnosis } from '../models/Diagnosis.js';
 
 const router = Router();
 
-// GET /api/diagnoses - Get all diagnoses for the logged-in user
+// GET /api/diagnoses 
 router.get('/', async (req, res) => {
   try {
-    // req.user.id should be available from your auth middleware
+
     const diagnoses = await Diagnosis.find({ userId: req.user.id })
       .sort({ createdAt: -1 }) // Sort newest first
       .limit(10); // Limit to 10
@@ -19,12 +19,12 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/diagnoses/:id - Get a single diagnosis
+// GET /api/diagnoses/:id 
 router.get('/:id', async (req, res) => {
   try {
     const diagnosis = await Diagnosis.findOne({
       _id: req.params.id,
-      userId: req.user.id // Ensure user can only get their own
+      userId: req.user.id 
     });
 
     if (!diagnosis) {
@@ -38,12 +38,12 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/diagnoses/:id - Delete a single diagnosis
+// DELETE /api/diagnoses/:id 
 router.delete('/:id', async (req, res) => {
   try {
     const result = await Diagnosis.findOneAndDelete({
       _id: req.params.id,
-      userId: req.user.id // Ensure user can only delete their own
+      userId: req.user.id 
     });
 
     if (!result) {

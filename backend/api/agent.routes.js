@@ -1,8 +1,6 @@
 // backend/api/agent.routes.js
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-// --- FIXED IMPORT ---
-// No longer need to import Diagnosis here, orchestrator handles it
 
 const router = Router();
 const agentLimiter = rateLimit({ windowMs: 60 * 1000, max: 10 });
@@ -18,10 +16,9 @@ function validateAgentPayload(body) {
   return errs;
 }
 
-// POST /api/agent  → main pipeline
-router.post('/', agentLimiter, async (req, res) => { // Note: Changed to '/' since api/index.js prefixes '/agent'
+// POST /api/agent 
+router.post('/', agentLimiter, async (req, res) => {  
   try {
-    // 1) Validate input early
     const errs = validateAgentPayload(req.body);
     if (errs.length) {
       return res.status(400).json({ status: 'error', code: 'BAD_REQUEST', message: errs.join(' ') });
@@ -29,29 +26,21 @@ router.post('/', agentLimiter, async (req, res) => { // Note: Changed to '/' sin
 
     const { description, imageBase64, experience, tools, location, clarifyAnswer } = req.body;
 
-    // 2) Try your full agent orchestrator (preferred)
     try {
-      // --- FIXED PATH: "agents" (plural) ---
       const { default: runAgent } = await import('../agents/orchestrator.js');
       if (typeof runAgent === 'function') {
         const input = { userId: req.user.id, description, imageBase64, experience, tools, location, clarifyAnswer };
         const result = await runAgent(input);
-        
-        // --- REMOVED DUPLICATE SAVE BLOCK ---
-        // orchestrator.js now handles all saving.
-        
+      
         return res.json({ status: 'ok', result });
       }
     } catch (e) {
        console.warn('runAgent not available or failed:', e.message);
-       // Fall through to fallback
     }
 
-    // 3) Fallback: call tools directly
     try {
       const { default: gemini } = await import('../services/gemini.js');
       const { default: youtube } = await import('../services/youtube.js');
-      // const { default: places } = await import('../services/places.js'); // You don't have this file, so commenting out
 
       const analysis = gemini?.analyze
         ? await gemini.analyze({ description, imageBase64, experience, tools, clarifyAnswer })
@@ -63,7 +52,7 @@ router.post('/', agentLimiter, async (req, res) => { // Note: Changed to '/' sin
 
       const videos = await youtube.search({ q: ytQuery, max: 3 });
       
-      // Not running places search since file is missing
+
       const nearby = []; 
 
       const merged = { analysis, videos, nearby };
@@ -84,8 +73,7 @@ router.post('/', agentLimiter, async (req, res) => { // Note: Changed to '/' sin
 
 // GET /api/search/videos?q=...
 router.get('/search/videos', async (req, res) => {
-  // ... (This route looks correct, but I'm removing it since api/index.js doesn't route it)
-  // ... If you want this route, add it to api/index.js
+
 });
 
 export default router;
