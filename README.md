@@ -101,7 +101,7 @@ All pages are fully responsive and optimized for mobile and tablet viewing.
 
 **Andrea Tran - tran3ah@mail.uc.edu**  
 Computer Engineering - University of Cincinnati, Class of 2029  
-**James Vo - jvo01@villanova.edu**  
+**James Vo - vongochieu2103@gmail.com**  
 Computer Engineering - Villanova University, Class of 2028
 
 ---
